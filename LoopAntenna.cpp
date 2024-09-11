@@ -87,7 +87,18 @@ void LoopAntenna::calcAmplitude(){
 }
 
 
-
+/** @brief Finds the closest gain value that is less than or equal to the 
+ *         desired value.
+ *  
+ *  This function navigates through a binary search tree of gain values 
+ *  stored in an array format. Starting at the root (index 0), it compares 
+ *  the desired value with the current gain. If the desired value is greater
+ *  than the current gain, it moves to the right child; otherwise, it moves 
+ *  to the left child. It continues this search until it finds the closest
+ *  gain value less than or equal to the desired gain.
+ * 
+ *  @param desired The desired gain value to search for.
+ */
 void LoopAntenna::bst(int desired){
     i = 0;
     index = 15;
