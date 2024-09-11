@@ -51,17 +51,11 @@ void LoopAntenna::measureAmplitude(){
             totalGain = (TARGET / amplitude) * totalGain;
 
             // FIND THE CLOSEST POSSIBLE GAIN
-            for(i=1; i<GAINS_SIZE+1; ++i){
-                if(totalGain < gainVals[i]){
-                    totalGain = gainVals[i-1];
-                    index = i-1;
-                    break;
-                }
-            }
+            bst(totalGain);
 
             // SET GAIN
-            amp1->setGain(gains[index].gain1);
-            amp2->setGain(gains[index].gain2);
+            amp1->setGain(tree[index].gain1);
+            amp2->setGain(tree[index].gain2);
 
         // IF THE SIGNAL IS HIGH DROP GAIN TO 1
         }else if(amplitude > MAXIMUM){
@@ -89,6 +83,23 @@ void LoopAntenna::calcAmplitude(){
     for(i=0; i<SAMPLES; ++i){
         if(readings[i] > amplitude)
             amplitude = readings[i];
+    }
+}
+
+
+
+void LoopAntenna::bst(int desired){
+    i = 0;
+    index = 15;
+    totalGain = 1;
+    while(i < GAINS_SIZE){
+        if(desired > tree[i].gain){
+            totalGain = tree[i].gain;
+            index = i;
+            i = i * 2 + 2;
+        }else{
+            i = i * 2 + 1;
+        }
     }
 }
 

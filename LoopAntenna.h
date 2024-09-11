@@ -10,15 +10,17 @@
 #define FLAT 1
 #define SAMPLES 200
 #define GAINS_SIZE 21
+#define TREE_SIZE 31
 #define ADC_CONVERT .003207
 
 class LoopAntenna{
 private:
-    struct Pair{
+    struct GainInfo{
+        int gain;
         uint8_t gain1;
         uint8_t gain2;
 
-        Pair(uint8_t g1, uint8_t g2) : gain1(g1), gain2(g2) {};
+        GainInfo(int g, uint8_t g1, uint8_t g2) : gain(g), gain1(g1), gain2(g2) {};
     };
 
     MCP6S2x* amp1;
@@ -32,29 +34,27 @@ private:
     int totalGain;
     int mean;
     int readings[SAMPLES];
-    int gainVals[GAINS_SIZE+1] = {1,2,4,5,8,10,16,20,25,32,40,50,64,80,
-                                  100,128,160,256,320,512,1024,INT16_MAX};
-    Pair gains[GAINS_SIZE] = {Pair(GAIN_1X, GAIN_1X),   // 1x
-                              Pair(GAIN_2X, GAIN_1X),   // 2x
-                              Pair(GAIN_2X, GAIN_2X),   // 4x
-                              Pair(GAIN_5X, GAIN_1X),   // 5x
-                              Pair(GAIN_4X, GAIN_2X),   // 8x
-                              Pair(GAIN_5X, GAIN_2X),   // 10x
-                              Pair(GAIN_4X, GAIN_4X),   // 16x
-                              Pair(GAIN_5X, GAIN_4X),   // 20x
-                              Pair(GAIN_5X, GAIN_5X),   // 25x
-                              Pair(GAIN_8X, GAIN_4X),   // 32x
-                              Pair(GAIN_8X, GAIN_5X),   // 40x
-                              Pair(GAIN_10X, GAIN_5X),  // 50x
-                              Pair(GAIN_8X, GAIN_8X),   // 64x
-                              Pair(GAIN_10X, GAIN_8X),  // 80x
-                              Pair(GAIN_10X, GAIN_10X), // 100x
-                              Pair(GAIN_16X, GAIN_8X),  // 128x
-                              Pair(GAIN_16X, GAIN_10X), // 160x
-                              Pair(GAIN_16X, GAIN_16X), // 256x
-                              Pair(GAIN_32X, GAIN_10X), // 320x
-                              Pair(GAIN_32X, GAIN_16X), // 512x
-                              Pair(GAIN_32X, GAIN_32X)};// 1024x
+    GainInfo tree[GAINS_SIZE] = {GainInfo(80, GAIN_10X, GAIN_8X),     // 80x
+                                 GainInfo(20, GAIN_5X, GAIN_4X),      // 20x
+                                 GainInfo(256, GAIN_16X, GAIN_16X),   // 256x
+                                 GainInfo(5, GAIN_5X, GAIN_1X),       // 5x
+                                 GainInfo(50, GAIN_10X, GAIN_5X),     // 50x
+                                 GainInfo(128, GAIN_16X, GAIN_8X),    // 128x
+                                 GainInfo(512, GAIN_32X, GAIN_16X),   // 512x
+                                 GainInfo(2, GAIN_2X, GAIN_1X),       // 2x
+                                 GainInfo(10, GAIN_5X, GAIN_2X),      // 10x
+                                 GainInfo(32, GAIN_8X, GAIN_4X),      // 32x
+                                 GainInfo(64, GAIN_8X, GAIN_8X),      // 64x
+                                 GainInfo(100, GAIN_10X, GAIN_10X),   // 100x
+                                 GainInfo(160, GAIN_16X, GAIN_10X),   // 160x
+                                 GainInfo(320, GAIN_32X, GAIN_10X),   // 320x
+                                 GainInfo(1024, GAIN_32X, GAIN_32X),  // 1024x
+                                 GainInfo(1, GAIN_1X, GAIN_1X),       // 1x
+                                 GainInfo(4, GAIN_2X, GAIN_2X),       // 4x
+                                 GainInfo(8, GAIN_4X, GAIN_2X),       // 8x
+                                 GainInfo(16, GAIN_4X, GAIN_4X),      // 16x
+                                 GainInfo(25, GAIN_5X, GAIN_5X),      // 25x
+                                 GainInfo(40, GAIN_8X, GAIN_5X)};     // 40x
  
 public: 
     LoopAntenna(MCP6S2x* ampA, MCP6S2x* ampB, 
@@ -62,6 +62,7 @@ public:
 
     void measureAmplitude();
     void calcAmplitude();
+    void bst(int desired);
     int getTotalGain();
     bool isFlat();
     void calcMean();
