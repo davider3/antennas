@@ -34,7 +34,7 @@ private:
     int totalGain;
     int mean;
     int readings[SAMPLES];
-    GainInfo tree[GAINS_SIZE] = {GainInfo(80, GAIN_10X, GAIN_8X),     // 80x
+    static const GainInfo tree[GAINS_SIZE] = {GainInfo(80, GAIN_10X, GAIN_8X),     // 80x
                                  GainInfo(20, GAIN_5X, GAIN_4X),      // 20x
                                  GainInfo(256, GAIN_16X, GAIN_16X),   // 256x
                                  GainInfo(5, GAIN_5X, GAIN_1X),       // 5x
