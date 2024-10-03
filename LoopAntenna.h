@@ -29,8 +29,10 @@ private:
     uint8_t amp2Ch;
     uint8_t i;
     uint8_t index;
+    uint8_t count;
     bool above;
     int amplitude;
+    int temp;
     int totalGain;
     int mean;
     int readings[SAMPLES];
