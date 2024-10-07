@@ -127,7 +127,7 @@ void LoopAntenna::calcAmplitude(){
         if(temp <= amplitude){
           count = 0;
           temp = amp2->getValue();
-        } else if(count > 3){
+        } else if(count > 10){
           state = GET_AMPLITUDE;
           count = 0;
           break;
@@ -142,7 +142,7 @@ void LoopAntenna::calcAmplitude(){
           count = 0;
           amplitude = temp;
           temp = amp2->getValue();
-        } else if(count > 10){
+        } else if(count > 20){
           state = INITIAL_CHECK;
           delay(100);
           exitLoop = true;
@@ -204,7 +204,6 @@ void LoopAntenna::bst(int desired){
 int LoopAntenna::getTotalGain(){
     return totalGain;
 }
-
 
 
 /** @brief Gets the current amplitude.

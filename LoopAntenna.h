@@ -7,7 +7,7 @@
 #define TARGET 700
 #define MINIMUM 350
 #define MAXIMUM 900
-#define FLAT 4
+#define FLAT 3
 #define GAINS_SIZE 21
 #define ADC_CONVERT .0032111
 #define MAX_ITER 1023
