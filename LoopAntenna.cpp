@@ -16,6 +16,7 @@ LoopAntenna::LoopAntenna(MCP6S2x* ampA, MCP6S2x* ampB,
     amp1->setGain(GAIN_1X);
     amp2->setGain(GAIN_1X);
     totalGain = 1;
+    state = INITIAL_CHECK;
 }
 
 
@@ -59,26 +60,21 @@ void LoopAntenna::measureAmplitude(){
     totalGain = 1;
 
     above = false;
+    i = 0;
 
     // DYNAMICALLY CHANGE THE GAIN
     while(1){
 
-        // READ IN SIGNAL
-        for(i=0; i<SAMPLES; ++i)
-            readings[i] = amp2->getValue();
-        
         // CALCULATE MAX AMPLITUDE
         calcAmplitude();
         
         // IF THE SIGNAL IS LOW INCREASE GAIN
         if(amplitude < MINIMUM){
 
-            // IF THE WAVE HAS FLATTENED AMPLITUDE IS 0
-            if(isFlat()){
-                amplitude = 0;
+            if(amplitude == 0){
                 return;
             }
-            
+
             // CALCULATE DESIRED GAIN
             totalGain = (TARGET / amplitude) * totalGain;
 
@@ -103,19 +99,74 @@ void LoopAntenna::measureAmplitude(){
         
         // IF THE SIGNAL IS IN THE DESIRED RANGE THEN RETURN
         }else return;
-
     }
 }
 
 
-/** @brief Calculates the maximum amplitude from the sampled readings.
+/** @brief Calculates the maximum amplitude of the sine wave input
  */
 void LoopAntenna::calcAmplitude(){
-    amplitude = 0;
-    for(i=0; i<SAMPLES; ++i){
-        if(readings[i] > amplitude)
-            amplitude = readings[i];
+  temp = amp2->getValue();
+  amplitude = temp;
+  exitLoop = false;
+  count = 0;
+  j = 0;
+  while(1){
+    switch(state) {
+
+      case INITIAL_CHECK:
+        temp = amp2->getValue();
+        if(temp > amplitude + 5){
+          state = GET_AMPLITUDE;
+        } else{
+          state = WAITING;
+        }
+        break;
+
+      case WAITING:
+        if(temp <= amplitude){
+          count = 0;
+          temp = amp2->getValue();
+        } else if(count > 3){
+          state = GET_AMPLITUDE;
+          count = 0;
+          break;
+        } else{
+          count += 1;
+          temp = amp2->getValue();
+        }
+        break;
+
+      case GET_AMPLITUDE:
+        if(temp >= amplitude){
+          count = 0;
+          amplitude = temp;
+          temp = amp2->getValue();
+        } else if(count > 10){
+          state = INITIAL_CHECK;
+          delay(100);
+          exitLoop = true;
+          break;
+        } else{
+          count += 1;
+          temp = amp2->getValue();
+        }
+        break;
+
     }
+
+    if(exitLoop) break;
+
+    ++j;
+    if(j >= MAX_ITER){
+        amplitude = 0;
+
+        amp1->setGain(GAIN_1X);
+        amp2->setGain(GAIN_1X);
+
+        break;
+    }
+  }
 }
 
 
@@ -154,31 +205,6 @@ int LoopAntenna::getTotalGain(){
     return totalGain;
 }
 
-
-/** @brief Checks if the waveform has flattened.
- *  @return True if the waveform is flat, false otherwise.
- */
-bool LoopAntenna::isFlat(){
-    calcMean();
-
-    if((amplitude - mean) < FLAT){
-        return true;
-    }else
-        return false;
-
-}
-
-
-/** @brief Calculates the mean of the sampled readings.
- */
-void LoopAntenna::calcMean(){
-    int sum = 0;
-    for(i=0; i<SAMPLES; ++i){
-        sum += readings[i];
-    }
-
-    mean = sum / SAMPLES;
-}
 
 
 /** @brief Gets the current amplitude.

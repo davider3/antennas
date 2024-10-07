@@ -8,10 +8,9 @@
 #define MINIMUM 350
 #define MAXIMUM 900
 #define FLAT 4
-#define SAMPLES 200
 #define GAINS_SIZE 21
-#define TREE_SIZE 31
-#define ADC_CONVERT .003207
+#define ADC_CONVERT .0032111
+#define MAX_ITER 1023
 
 class LoopAntenna{
 private:
@@ -22,20 +21,23 @@ private:
 
         GainInfo(int g, uint8_t g1, uint8_t g2) : gain(g), gain1(g1), gain2(g2) {};
     };
+    enum States {INITIAL_CHECK, WAITING, GET_AMPLITUDE};
 
     MCP6S2x* amp1;
     MCP6S2x* amp2;
     uint8_t amp1Ch;
     uint8_t amp2Ch;
     uint8_t i;
+    int j;
     uint8_t index;
     uint8_t count;
     bool above;
+    bool exitLoop;
     int amplitude;
     int temp;
     int totalGain;
     int mean;
-    int readings[SAMPLES];
+    States state;
     static GainInfo tree[GAINS_SIZE];
  
 public: 
@@ -46,8 +48,6 @@ public:
     void calcAmplitude();
     void bst(int desired);
     int getTotalGain();
-    bool isFlat();
-    void calcMean();
     int getAmplitude();
     float getOGAmplitude();
     
