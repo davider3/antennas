@@ -142,7 +142,7 @@ void LoopAntenna::calcAmplitude(){
           count = 0;
           amplitude = temp;
           temp = amp2->getValue();
-        } else if(count > 20){
+        } else if(count > 50){
           state = INITIAL_CHECK;
           delay(100);
           exitLoop = true;
@@ -218,5 +218,5 @@ int LoopAntenna::getAmplitude(){
  *  @return The original amplitude as a floating-point number.
  */
 float LoopAntenna::getOGAmplitude(){
-    return 2 * ((amplitude * ADC_CONVERT) / totalGain);
+    return (2 * ((amplitude * ADC_CONVERT) / totalGain));
 }

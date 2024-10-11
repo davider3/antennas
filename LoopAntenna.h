@@ -9,7 +9,9 @@
 #define MAXIMUM 900
 #define FLAT 3
 #define GAINS_SIZE 21
-#define ADC_CONVERT .0032111
+#define ADC_RES 1023.0
+#define V_REF 3.277
+#define ADC_CONVERT V_REF / ADC_RES
 #define MAX_ITER 1023
 
 class LoopAntenna{
